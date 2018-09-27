@@ -75,26 +75,26 @@ static const char *ical_recur_type[RECUR_TYPES] =
 /* iCal alarm notification. */
 static void ical_export_valarm(FILE * stream)
 {
-	fputs("BEGIN:VALARM\n", stream);
+	fputs("BEGIN:VALARM\r\n", stream);
 	pthread_mutex_lock(&nbar.mutex);
-	fprintf(stream, "TRIGGER:-P%dS\n", nbar.cntdwn);
+	fprintf(stream, "TRIGGER:-P%dS\r\n", nbar.cntdwn);
 	pthread_mutex_unlock(&nbar.mutex);
-	fputs("ACTION:DISPLAY\n", stream);
-	fputs("END:VALARM\n", stream);
+	fputs("ACTION:DISPLAY\r\n", stream);
+	fputs("END:VALARM\r\n", stream);
 }
 
 /* Export header. */
 static void ical_export_header(FILE * stream)
 {
-	fputs("BEGIN:VCALENDAR\n", stream);
-	fprintf(stream, "PRODID:-//calcurse//NONSGML v%s//EN\n", VERSION);
-	fputs("VERSION:2.0\n", stream);
+	fputs("BEGIN:VCALENDAR\r\n", stream);
+	fprintf(stream, "PRODID:-//calcurse//NONSGML v%s//EN\r\n", VERSION);
+	fputs("VERSION:2.0\r\n", stream);
 }
 
 /* Export footer. */
 static void ical_export_footer(FILE * stream)
 {
-	fputs("END:VCALENDAR\n", stream);
+	fputs("END:VCALENDAR\r\n", stream);
 }
 
 /* Export recurrent events. */
@@ -106,17 +106,17 @@ static void ical_export_recur_events(FILE * stream, int export_uid)
 	LLIST_FOREACH(&recur_elist, i) {
 		struct recur_event *rev = LLIST_GET_DATA(i);
 		date_sec2date_fmt(rev->day, ICALDATEFMT, ical_date);
-		fputs("BEGIN:VEVENT\n", stream);
-		fprintf(stream, "DTSTART:%s\n", ical_date);
+		fputs("BEGIN:VEVENT\r\n", stream);
+		fprintf(stream, "DTSTART:%s\r\n", ical_date);
 		fprintf(stream, "RRULE:FREQ=%s;INTERVAL=%d",
 			ical_recur_type[rev->rpt->type], rev->rpt->freq);
 
 		if (rev->rpt->until != 0) {
 			date_sec2date_fmt(rev->rpt->until, ICALDATEFMT,
 					  ical_date);
-			fprintf(stream, ";UNTIL=%s\n", ical_date);
+			fprintf(stream, ";UNTIL=%s\r\n", ical_date);
 		} else {
-			fputc('\n', stream);
+			fputc('\r\n', stream);
 		}
 
 		if (LLIST_FIRST(&rev->exc)) {
@@ -126,19 +126,19 @@ static void ical_export_recur_events(FILE * stream, int export_uid)
 				date_sec2date_fmt(exc->st, ICALDATEFMT,
 						  ical_date);
 				fprintf(stream, "%s", ical_date);
-				fputc(LLIST_NEXT(j) ? ',' : '\n', stream);
+				fputc(LLIST_NEXT(j) ? ',' : '\r\n', stream);
 			}
 		}
 
-		fprintf(stream, "SUMMARY:%s\n", rev->mesg);
+		fprintf(stream, "SUMMARY:%s\r\n", rev->mesg);
 
 		if (export_uid) {
 			char *hash = recur_event_hash(rev);
-			fprintf(stream, "UID:%s\n", hash);
+			fprintf(stream, "UID:%s\r\n", hash);
 			mem_free(hash);
 		}
 
-		fputs("END:VEVENT\n", stream);
+		fputs("END:VEVENT\r\n", stream);
 	}
 }
 
@@ -151,17 +151,17 @@ static void ical_export_events(FILE * stream, int export_uid)
 	LLIST_FOREACH(&eventlist, i) {
 		struct event *ev = LLIST_TS_GET_DATA(i);
 		date_sec2date_fmt(ev->day, ICALDATEFMT, ical_date);
-		fputs("BEGIN:VEVENT\n", stream);
-		fprintf(stream, "DTSTART;VALUE=DATE:%s\n", ical_date);
-		fprintf(stream, "SUMMARY:%s\n", ev->mesg);
+		fputs("BEGIN:VEVENT\r\n", stream);
+		fprintf(stream, "DTSTART;VALUE=DATE:%s\r\n", ical_date);
+		fprintf(stream, "SUMMARY:%s\r\n", ev->mesg);
 
 		if (export_uid) {
 			char *hash = event_hash(ev);
-			fprintf(stream, "UID:%s\n", hash);
+			fprintf(stream, "UID:%s\r\n", hash);
 			mem_free(hash);
 		}
 
-		fputs("END:VEVENT\n", stream);
+		fputs("END:VEVENT\r\n", stream);
 	}
 }
 
@@ -178,10 +178,10 @@ static void ical_export_recur_apoints(FILE * stream, int export_uid)
 
 		date_sec2date_fmt(rapt->start, ICALDATETIMEFMT,
 				  ical_datetime);
-		fputs("BEGIN:VEVENT\n", stream);
-		fprintf(stream, "DTSTART:%s\n", ical_datetime);
+		fputs("BEGIN:VEVENT\r\n", stream);
+		fprintf(stream, "DTSTART:%s\r\n", ical_datetime);
 		if (rapt->dur > 0) {
-			fprintf(stream, "DURATION:P%ldDT%ldH%ldM%ldS\n",
+			fprintf(stream, "DURATION:P%ldDT%ldH%ldM%ldS\r\n",
 				rapt->dur / DAYINSEC,
 				(rapt->dur / HOURINSEC) % DAYINHOURS,
 				(rapt->dur / MININSEC) % HOURINMIN,
@@ -193,9 +193,9 @@ static void ical_export_recur_apoints(FILE * stream, int export_uid)
 		if (rapt->rpt->until != 0) {
 			date_sec2date_fmt(rapt->rpt->until + HOURINSEC,
 					  ICALDATEFMT, ical_date);
-			fprintf(stream, ";UNTIL=%s\n", ical_date);
+			fprintf(stream, ";UNTIL=%s\r\n", ical_date);
 		} else {
-			fputc('\n', stream);
+			fputc('\r\n', stream);
 		}
 
 		if (LLIST_FIRST(&rapt->exc)) {
@@ -205,21 +205,21 @@ static void ical_export_recur_apoints(FILE * stream, int export_uid)
 				date_sec2date_fmt(exc->st, ICALDATEFMT,
 						  ical_date);
 				fprintf(stream, "%s", ical_date);
-				fputc(LLIST_NEXT(j) ? ',' : '\n', stream);
+				fputc(LLIST_NEXT(j) ? ',' : '\r\n', stream);
 			}
 		}
 
-		fprintf(stream, "SUMMARY:%s\n", rapt->mesg);
+		fprintf(stream, "SUMMARY:%s\r\n", rapt->mesg);
 		if (rapt->state & APOINT_NOTIFY)
 			ical_export_valarm(stream);
 
 		if (export_uid) {
 			char *hash = recur_apoint_hash(rapt);
-			fprintf(stream, "UID:%s\n", hash);
+			fprintf(stream, "UID:%s\r\n", hash);
 			mem_free(hash);
 		}
 
-		fputs("END:VEVENT\n", stream);
+		fputs("END:VEVENT\r\n", stream);
 	}
 	LLIST_TS_UNLOCK(&recur_alist_p);
 }
@@ -235,26 +235,26 @@ static void ical_export_apoints(FILE * stream, int export_uid)
 		struct apoint *apt = LLIST_TS_GET_DATA(i);
 		date_sec2date_fmt(apt->start, ICALDATETIMEFMT,
 				  ical_datetime);
-		fputs("BEGIN:VEVENT\n", stream);
-		fprintf(stream, "DTSTART:%s\n", ical_datetime);
+		fputs("BEGIN:VEVENT\r\n", stream);
+		fprintf(stream, "DTSTART:%s\r\n", ical_datetime);
 		if (apt->dur > 0) {
-			fprintf(stream, "DURATION:P%ldDT%ldH%ldM%ldS\n",
+			fprintf(stream, "DURATION:P%ldDT%ldH%ldM%ldS\r\n",
 				apt->dur / DAYINSEC,
 				(apt->dur / HOURINSEC) % DAYINHOURS,
 				(apt->dur / MININSEC) % HOURINMIN,
 				apt->dur % MININSEC);
 		}
-		fprintf(stream, "SUMMARY:%s\n", apt->mesg);
+		fprintf(stream, "SUMMARY:%s\r\n", apt->mesg);
 		if (apt->state & APOINT_NOTIFY)
 			ical_export_valarm(stream);
 
 		if (export_uid) {
 			char *hash = apoint_hash(apt);
-			fprintf(stream, "UID:%s\n", hash);
+			fprintf(stream, "UID:%s\r\n", hash);
 			mem_free(hash);
 		}
 
-		fputs("END:VEVENT\n", stream);
+		fputs("END:VEVENT\r\n", stream);
 	}
 	LLIST_TS_UNLOCK(&alist_p);
 }
@@ -267,19 +267,19 @@ static void ical_export_todo(FILE * stream, int export_uid)
 	LLIST_FOREACH(&todolist, i) {
 		struct todo *todo = LLIST_TS_GET_DATA(i);
 
-		fputs("BEGIN:VTODO\n", stream);
+		fputs("BEGIN:VTODO\r\n", stream);
 		if (todo->completed)
-			fprintf(stream, "STATUS:COMPLETED\n");
-		fprintf(stream, "PRIORITY:%d\n", todo->id);
-		fprintf(stream, "SUMMARY:%s\n", todo->mesg);
+			fprintf(stream, "STATUS:COMPLETED\r\n");
+		fprintf(stream, "PRIORITY:%d\r\n", todo->id);
+		fprintf(stream, "SUMMARY:%s\r\n", todo->mesg);
 
 		if (export_uid) {
 			char *hash = todo_hash(todo);
-			fprintf(stream, "UID:%s\n", hash);
+			fprintf(stream, "UID:%s\r\n", hash);
 			mem_free(hash);
 		}
 
-		fputs("END:VTODO\n", stream);
+		fputs("END:VTODO\r\n", stream);
 	}
 }
 
@@ -287,20 +287,20 @@ static void ical_export_todo(FILE * stream, int export_uid)
 static void ical_log_init(FILE * log, int major, int minor)
 {
 	const char *header =
-	    "+-------------------------------------------------------------------+\n"
-	    "| Calcurse icalendar import log.                                    |\n"
-	    "|                                                                   |\n"
-	    "| Items imported from icalendar file, version %d.%d                   |\n"
-	    "| Some items could not be imported, they are described hereafter.   |\n"
-	    "| The log line format is as follows:                                |\n"
-	    "|                                                                   |\n"
-	    "|       TYPE [LINE]: DESCRIPTION                                    |\n"
-	    "|                                                                   |\n"
-	    "| where:                                                            |\n"
-	    "|  * TYPE represents the item type ('VEVENT' or 'VTODO')            |\n"
-	    "|  * LINE is the line in the input stream at which this item begins |\n"
-	    "|  * DESCRIPTION indicates why the item could not be imported       |\n"
-	    "+-------------------------------------------------------------------+\n\n";
+	    "+-------------------------------------------------------------------+\r\n"
+	    "| Calcurse icalendar import log.                                    |\r\n"
+	    "|                                                                   |\r\n"
+	    "| Items imported from icalendar file, version %d.%d                   |\r\n"
+	    "| Some items could not be imported, they are described hereafter.   |\r\n"
+	    "| The log line format is as follows:                                |\r\n"
+	    "|                                                                   |\r\n"
+	    "|       TYPE [LINE]: DESCRIPTION                                    |\r\n"
+	    "|                                                                   |\r\n"
+	    "| where:                                                            |\r\n"
+	    "|  * TYPE represents the item type ('VEVENT' or 'VTODO')            |\r\n"
+	    "|  * LINE is the line in the input stream at which this item begins |\r\n"
+	    "|  * DESCRIPTION indicates why the item could not be imported       |\r\n"
+	    "+-------------------------------------------------------------------+\r\n\r\n";
 
 	if (log)
 		fprintf(log, header, major, minor);
@@ -321,7 +321,7 @@ static void ical_log(FILE * log, ical_types_e type, unsigned lineno,
 	if (!log)
 		return;
 
-	fprintf(log, "%s [%d]: %s\n", typestr[type], lineno, msg);
+	fprintf(log, "%s [%d]: %s\r\n", typestr[type], lineno, msg);
 }
 
 static void ical_store_todo(int priority, int completed, char *mesg,
@@ -424,7 +424,7 @@ static char *ical_unformat_line(char *line)
 		case '\\':
 			switch (*(p + 1)) {
 			case 'n':
-				string_catf(&s, "%c", '\n');
+				string_catf(&s, "%c", '\r\n');
 				p++;
 				break;
 			case 't':
@@ -458,7 +458,7 @@ ical_readline_init(FILE * fdi, char *buf, char *lstore, unsigned *ln)
 
 	*buf = *lstore = '\0';
 	if (fgets(lstore, BUFSIZ, fdi)) {
-		if ((eol = strchr(lstore, '\n')) != NULL) {
+		if ((eol = strchr(lstore, '\r\n')) != NULL) {
 			if (*(eol - 1) == '\r')
 				*(eol - 1) = '\0';
 			else
@@ -476,7 +476,7 @@ static int ical_readline(FILE * fdi, char *buf, char *lstore, unsigned *ln)
 	(*ln)++;
 
 	while (fgets(lstore, BUFSIZ, fdi) != NULL) {
-		if ((eol = strchr(lstore, '\n')) != NULL) {
+		if ((eol = strchr(lstore, '\r\n')) != NULL) {
 			if (*(eol - 1) == '\r')
 				*(eol - 1) = '\0';
 			else
@@ -886,7 +886,7 @@ static char *ical_read_summary(char *line)
 		return NULL;
 
 	/* Event summaries must not contain newlines. */
-	for (p = strchr(summary, '\n'); p; p = strchr(p, '\n'))
+	for (p = strchr(summary, '\r\n'); p; p = strchr(p, '\r\n'))
 		*p = ' ';
 
 	return summary;

@@ -181,7 +181,14 @@ static FILE *get_export_stream(enum export_type type)
 			mem_free(stream_name);
 			return NULL;
 		}
-		stream = fopen(stream_name, "w");
+
+        switch (type) {
+			case IO_EXPORT_ICAL:
+				stream = fopen(stream_name, "wb");
+			case IO_EXPORT_PCAL:
+				stream = fopen(stream_name, "w");
+		}
+			
 		if (stream == NULL) {
 			status_mesg(wrong_name, press_enter);
 			keys_wait_for_any_key(win[KEY].p);
