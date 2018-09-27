@@ -287,20 +287,20 @@ static void ical_export_todo(FILE * stream, int export_uid)
 static void ical_log_init(FILE * log, int major, int minor)
 {
 	const char *header =
-	    "+-------------------------------------------------------------------+\r\n"
-	    "| Calcurse icalendar import log.                                    |\r\n"
-	    "|                                                                   |\r\n"
-	    "| Items imported from icalendar file, version %d.%d                   |\r\n"
-	    "| Some items could not be imported, they are described hereafter.   |\r\n"
-	    "| The log line format is as follows:                                |\r\n"
-	    "|                                                                   |\r\n"
-	    "|       TYPE [LINE]: DESCRIPTION                                    |\r\n"
-	    "|                                                                   |\r\n"
-	    "| where:                                                            |\r\n"
-	    "|  * TYPE represents the item type ('VEVENT' or 'VTODO')            |\r\n"
-	    "|  * LINE is the line in the input stream at which this item begins |\r\n"
-	    "|  * DESCRIPTION indicates why the item could not be imported       |\r\n"
-	    "+-------------------------------------------------------------------+\r\n\r\n";
+	    "+-------------------------------------------------------------------+\n"
+	    "| Calcurse icalendar import log.                                    |\n"
+	    "|                                                                   |\n"
+	    "| Items imported from icalendar file, version %d.%d                   |\n"
+	    "| Some items could not be imported, they are described hereafter.   |\n"
+	    "| The log line format is as follows:                                |\n"
+	    "|                                                                   |\n"
+	    "|       TYPE [LINE]: DESCRIPTION                                    |\n"
+	    "|                                                                   |\n"
+	    "| where:                                                            |\n"
+	    "|  * TYPE represents the item type ('VEVENT' or 'VTODO')            |\n"
+	    "|  * LINE is the line in the input stream at which this item begins |\n"
+	    "|  * DESCRIPTION indicates why the item could not be imported       |\n"
+	    "+-------------------------------------------------------------------+\n\n";
 
 	if (log)
 		fprintf(log, header, major, minor);
@@ -321,7 +321,7 @@ static void ical_log(FILE * log, ical_types_e type, unsigned lineno,
 	if (!log)
 		return;
 
-	fprintf(log, "%s [%d]: %s\r\n", typestr[type], lineno, msg);
+	fprintf(log, "%s [%d]: %s\n", typestr[type], lineno, msg);
 }
 
 static void ical_store_todo(int priority, int completed, char *mesg,
@@ -424,7 +424,7 @@ static char *ical_unformat_line(char *line)
 		case '\\':
 			switch (*(p + 1)) {
 			case 'n':
-				string_catf(&s, "%c", '\r\n');
+				string_catf(&s, "%c", '\n');
 				p++;
 				break;
 			case 't':
@@ -458,7 +458,7 @@ ical_readline_init(FILE * fdi, char *buf, char *lstore, unsigned *ln)
 
 	*buf = *lstore = '\0';
 	if (fgets(lstore, BUFSIZ, fdi)) {
-		if ((eol = strchr(lstore, '\r\n')) != NULL) {
+		if ((eol = strchr(lstore, '\n')) != NULL) {
 			if (*(eol - 1) == '\r')
 				*(eol - 1) = '\0';
 			else
@@ -476,7 +476,7 @@ static int ical_readline(FILE * fdi, char *buf, char *lstore, unsigned *ln)
 	(*ln)++;
 
 	while (fgets(lstore, BUFSIZ, fdi) != NULL) {
-		if ((eol = strchr(lstore, '\r\n')) != NULL) {
+		if ((eol = strchr(lstore, '\n')) != NULL) {
 			if (*(eol - 1) == '\r')
 				*(eol - 1) = '\0';
 			else
@@ -886,7 +886,7 @@ static char *ical_read_summary(char *line)
 		return NULL;
 
 	/* Event summaries must not contain newlines. */
-	for (p = strchr(summary, '\r\n'); p; p = strchr(p, '\r\n'))
+	for (p = strchr(summary, '\n'); p; p = strchr(p, '\n'))
 		*p = ' ';
 
 	return summary;
